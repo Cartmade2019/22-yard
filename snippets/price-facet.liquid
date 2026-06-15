@@ -1,0 +1,183 @@
+{%- liquid
+  assign min_value = filter.min_value.value | default: 0 | money_without_currency | replace: ',', '' | ceil
+  assign max_value = filter.max_value.value | default: filter.range_max | money_without_currency | replace: ',', '' | ceil
+  assign range_max = filter.range_max | money_without_currency | replace: ',', '' | ceil
+-%}
+
+<price-range class="price-slider-wrapper">
+  <div class="range-container">
+    <div class="range-track"></div>
+    <div class="range-track-active"></div>
+
+    <input
+      type="range"
+      class="range-slider-input"
+      min="0"
+      max="{{ range_max }}"
+      value="{{ min_value }}"
+      step="1"
+    >
+
+    <input
+      type="range"
+      class="range-slider-input"
+      min="0"
+      max="{{ range_max }}"
+      value="{{ max_value }}"
+      step="1"
+    >
+  </div>
+
+  <div class="price-inputs-display">
+    <div class="field">
+      <input
+        class="field__input"
+        type="number"
+        name="{{ filter.min_value.param_name }}"
+        value="{{ min_value }}"
+        min="0"
+        max="{{ range_max }}"
+      >
+    </div>
+    <p>-</p>
+    <div class="field">
+      <input
+        class="field__input"
+        type="number"
+        name="{{ filter.max_value.param_name }}"
+        value="{{ max_value }}"
+        min="0"
+        max="{{ range_max }}"
+      >
+    </div>
+  </div>
+
+  <div class="price-range-display">
+    <p class="price-display-wrapper">
+      Price:
+      <span
+        id="price-display"
+        data-currency-symbol="{{ cart.currency.symbol }}"
+        data-currency-format="before"
+      >{{ min_value | money }}<span class="line2"></span>{{ max_value | money }}</span>
+    </p>
+  </div>
+</price-range>
+
+
+
+<style>
+  .price-separator{
+    background-color: #141414;
+    width: 10px;
+    height: 1px;
+    display: inline-block;
+  }
+  .price-display-wrapper{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  #price-display{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .price-range-display{
+    font-size: 14px;
+    color: #141414;
+  }
+  .price-range-display p{
+    margin: 0;
+  }
+  .price-slider-wrapper{
+    width: 100%;
+  }
+  .price-slider-wrapper .range-track, .price-slider-wrapper .range-track-active{
+    display: block;
+  }
+  .range-container {
+    position: relative;
+    height: 30px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Gray track behind slider */
+  .range-track {
+    position: absolute;
+    height: 4px;
+    width: 100%;
+    background: #E2E8F0;
+    border-radius: 2px;
+    z-index: 1;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* Active fill between sliders */
+  .range-track-active {
+    position: absolute;
+    height: 4px;
+    background: #000; /* Change to your desi#000 color */
+    border-radius: 2px;
+    z-index: 1;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: left 0.15s ease, width 0.15s ease;
+  }
+
+  .range-slider-input {
+    position: absolute;
+    width: 100%;
+    background: none;
+    appearance: none;
+    -webkit-appearance: none;
+    pointer-events: none;
+    z-index: 2;
+    margin: 0;
+  }
+
+  /* Slider thumb for Webkit */
+  .range-slider-input::-webkit-slider-thumb {
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #fff; /* Thumb color */
+    cursor: pointer;
+    pointer-events: auto;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 5px solid #000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  /* Slider thumb for Firefox */
+  .range-slider-input::-moz-range-thumb {
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #fff; /* Thumb color */
+    cursor: pointer;
+    pointer-events: auto;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 5px solid #000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  /* Input boxes below slider */
+  .price-inputs-display {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .price-inputs-display .field {
+    display: flex;
+    align-items: center;
+  }
+
+  .price-inputs-display .field-currency {
+    margin-right: 0.25rem;
+  }
+</style>

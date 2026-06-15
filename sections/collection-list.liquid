@@ -1,0 +1,601 @@
+{{ 'section-collection-list.css' | asset_url | stylesheet_tag }}
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-slider.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign use_swiper_desktop = false
+  assign use_swiper_mobile = false
+  if section.settings.layout_mode == 'slider'
+    if section.settings.enable_swiper_desktop
+      assign use_swiper_desktop = true
+    endif
+    if section.settings.enable_swiper_mobile
+      assign use_swiper_mobile = true
+    endif
+  endif
+-%}
+
+{%- if use_swiper_desktop or use_swiper_mobile -%}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+{%- endif -%}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign columns_mobile_int = section.settings.columns_mobile | plus: 0
+  assign show_mobile_slider = false
+  if section.settings.layout_mode == 'grid' and section.settings.swipe_on_mobile and section.blocks.size > columns_mobile_int
+    assign show_mobile_slider = true
+  endif
+-%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient {{ section.settings.custom_class }}">
+  <div class="collection-list-wrapper page-width isolate{% if show_mobile_slider %} page-width-desktop{% endif %}{% if section.settings.title == blank %} no-heading{% endif %}{% if section.settings.show_view_all == false or section.blocks.size > collections.size %} no-mobile-link{% endif %} section-{{ section.id }}-padding">
+
+    {%- unless section.settings.title == blank -%}
+      <div class="title-wrapper-with-link{% if show_mobile_slider %} title-wrapper--self-padded-tablet-down{% else %} title-wrapper--self-padded-mobile{% endif %} title-wrapper--no-top-margin">
+        <h2
+          id="SectionHeading-{{ section.id }}"
+          class="collection-list-title inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+        >
+          {{ section.settings.title }}
+        </h2>
+        {%- if section.settings.show_view_all and show_mobile_slider -%}
+          <a
+            href="{{ routes.collections_url }}"
+            id="ViewAll-{{ section.id }}"
+            class="link underlined-link large-up-hide{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+            aria-labelledby="ViewAll-{{ section.id }} SectionHeading-{{ section.id }}"
+          >
+            {{- 'sections.collection_list.view_all' | t -}}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endunless -%}
+
+    {%- if section.settings.layout_mode == 'slider' -%}
+      {%- comment -%} ===== SWIPER SLIDER LAYOUT ===== {%- endcomment -%}
+      <div
+        class="cl-swiper-section{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+        data-section-id="{{ section.id }}"
+        data-swiper-desktop="{{ use_swiper_desktop }}"
+        data-swiper-mobile="{{ use_swiper_mobile }}"
+        data-columns-desktop="{{ section.settings.columns_desktop }}"
+        data-columns-mobile="{{ section.settings.columns_mobile }}"
+        data-arrows-desktop="{{ section.settings.show_arrows_desktop }}"
+        data-arrows-mobile="{{ section.settings.show_arrows_mobile }}"
+        data-pagination-desktop="{{ section.settings.show_pagination_desktop }}"
+        data-pagination-mobile="{{ section.settings.show_pagination_mobile }}"
+        data-arrow-position="{{ section.settings.arrow_position }}"
+      >
+        <div class="cl-swiper-inner">
+          <button type="button" class="cl-swiper-btn cl-swiper-btn-prev-{{ section.id }}" aria-label="{{ 'general.slider.previous_slide' | t }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <div class="swiper cl-swiper-{{ section.id }}">
+            <div class="swiper-wrapper">
+              {%- liquid
+                assign columns = section.blocks.size
+                if columns > 3
+                  assign columns = 3
+                endif
+              -%}
+              {%- for block in section.blocks -%}
+                <div class="swiper-slide" {{ block.shopify_attributes }}>
+                  {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
+                  {%- assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index -%}
+                  {% render 'card-collection',
+                    card_collection: block.settings.collection,
+                    media_aspect_ratio: section.settings.image_ratio,
+                    columns: columns,
+                    placeholder_image: placeholder_image
+                  %}
+                </div>
+              {%- endfor -%}
+            </div>
+          </div>
+          <button type="button" class="cl-swiper-btn cl-swiper-btn-next-{{ section.id }}" aria-label="{{ 'general.slider.next_slide' | t }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+        {%- if section.settings.arrow_position == 'bottom_center' -%}
+          <div class="cl-swiper-arrows--bottom-center">
+            <button type="button" class="cl-swiper-btn cl-swiper-btn-bc-prev-{{ section.id }}" aria-label="{{ 'general.slider.previous_slide' | t }}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button type="button" class="cl-swiper-btn cl-swiper-btn-bc-next-{{ section.id }}" aria-label="{{ 'general.slider.next_slide' | t }}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+        {%- endif -%}
+        <div class="cl-swiper-pagination-{{ section.id }} cl-swiper-pagination"></div>
+      </div>
+
+      <script>
+        (function () {
+          function initClSwiper() {
+            if (typeof Swiper === 'undefined') {
+              setTimeout(initClSwiper, 100);
+              return;
+            }
+            var el = document.querySelector('.cl-swiper-section[data-section-id="{{ section.id }}"]');
+            if (!el) return;
+
+            var isMobile = window.innerWidth < 750;
+            var enableDesktop = el.dataset.swiperDesktop === 'true';
+            var enableMobile = el.dataset.swiperMobile === 'true';
+            var colsDesktop = parseInt(el.dataset.columnsDesktop) || 3;
+            var colsMobile = parseInt(el.dataset.columnsMobile) || 1;
+            var arrowsDesktop = el.dataset.arrowsDesktop === 'true';
+            var arrowsMobile = el.dataset.arrowsMobile === 'true';
+            var paginationDesktop = el.dataset.paginationDesktop === 'true';
+            var paginationMobile = el.dataset.paginationMobile === 'true';
+            var arrowPosition = el.dataset.arrowPosition || 'left_right';
+
+            var enabled = isMobile ? enableMobile : enableDesktop;
+            if (!enabled) {
+              el.classList.add('cl-swiper--grid');
+              el.style.setProperty('--cl-cols-desktop', colsDesktop);
+              el.style.setProperty('--cl-cols-mobile', colsMobile);
+              return;
+            }
+
+            var showArrows = isMobile ? arrowsMobile : arrowsDesktop;
+            var showPagination = isMobile ? paginationMobile : paginationDesktop;
+
+            var prevBtn, nextBtn;
+            var bcPrevBtn = el.querySelector('.cl-swiper-btn-bc-prev-{{ section.id }}');
+            var bcNextBtn = el.querySelector('.cl-swiper-btn-bc-next-{{ section.id }}');
+            var bcContainer = el.querySelector('.cl-swiper-arrows--bottom-center');
+
+            if (arrowPosition === 'bottom_center' && bcPrevBtn && bcNextBtn) {
+              prevBtn = bcPrevBtn;
+              nextBtn = bcNextBtn;
+              /* Hide the side arrows */
+              var sidePrev = el.querySelector('.cl-swiper-btn-prev-{{ section.id }}');
+              var sideNext = el.querySelector('.cl-swiper-btn-next-{{ section.id }}');
+              if (sidePrev) sidePrev.style.display = 'none';
+              if (sideNext) sideNext.style.display = 'none';
+              if (!showArrows && bcContainer) bcContainer.style.display = 'none';
+            } else {
+              prevBtn = el.querySelector('.cl-swiper-btn-prev-{{ section.id }}');
+              nextBtn = el.querySelector('.cl-swiper-btn-next-{{ section.id }}');
+              /* Hide bottom-center arrows if present */
+              if (bcContainer) bcContainer.style.display = 'none';
+              if (!showArrows) {
+                if (prevBtn) prevBtn.style.display = 'none';
+                if (nextBtn) nextBtn.style.display = 'none';
+              }
+            }
+            var paginationEl = el.querySelector('.cl-swiper-pagination-{{ section.id }}');
+            if (!showPagination && paginationEl) {
+              paginationEl.style.display = 'none';
+            }
+
+            new Swiper('.cl-swiper-{{ section.id }}', {
+              slidesPerView: colsMobile,
+              spaceBetween: 16,
+              navigation: showArrows ? {
+                nextEl: nextBtn,
+                prevEl: prevBtn,
+              } : false,
+              pagination: showPagination ? {
+                el: '.cl-swiper-pagination-{{ section.id }}',
+                clickable: true,
+              } : false,
+              on: {
+                init: function (swiper) {
+                  if (!showArrows) {
+                    el.querySelector('.cl-swiper-btn-prev-{{ section.id }}').style.display = 'none';
+                    el.querySelector('.cl-swiper-btn-next-{{ section.id }}').style.display = 'none';
+                  }
+                  if (!showPagination) {
+                    el.querySelector('.cl-swiper-pagination-{{ section.id }}').style.display = 'none';
+                  }
+                },
+              },
+              breakpoints: {
+                750: {
+                  slidesPerView: colsDesktop,
+                  spaceBetween: 20,
+                },
+              },
+            });
+          }
+          document.addEventListener('DOMContentLoaded', initClSwiper);
+        })();
+      </script>
+
+    {%- else -%}
+      {%- comment -%} ===== DEFAULT GRID LAYOUT ===== {%- endcomment -%}
+      <slider-component class="slider-mobile-gutter{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        <ul
+          class="collection-list contains-card contains-card--collection{% if settings.card_style == 'standard' %} contains-card--standard{% endif %} grid grid--{{ section.settings.columns_desktop }}-col-desktop grid--{{ section.settings.columns_mobile }}-col-tablet-down{% if section.settings.swipe_on_mobile %} slider slider--tablet grid--peek{% endif %} collection-list--{{ section.blocks.size }}-items"
+          id="Slider-{{ section.id }}"
+          role="list"
+        >
+          {%- liquid
+            assign columns = section.blocks.size
+            if columns > 3
+              assign columns = 3
+            endif
+          -%}
+          {%- for block in section.blocks -%}
+            <li
+              id="Slide-{{ section.id }}-{{ forloop.index }}"
+              class="collection-list__item grid__item{% if show_mobile_slider %} slider__slide{% endif %}{% if block.settings.collection.featured_image == nil %} collection-list__item--no-media{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+              {{ block.shopify_attributes }}
+              {% if settings.animations_reveal_on_scroll %}
+                data-cascade
+                style="--animation-order: {{ forloop.index }};"
+              {% endif %}
+            >
+              {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
+              {%- assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index -%}
+              {% render 'card-collection',
+                card_collection: block.settings.collection,
+                media_aspect_ratio: section.settings.image_ratio,
+                columns: columns,
+                placeholder_image: placeholder_image
+              %}
+            </li>
+          {%- endfor -%}
+        </ul>
+        {%- if show_mobile_slider -%}
+          <div class="slider-buttons">
+            <button type="button" class="slider-button slider-button--prev" name="previous" aria-label="{{ 'general.slider.previous_slide' | t }}">
+              <span class="svg-wrapper">{{- 'icon-caret.svg' | inline_asset_content -}}</span>
+            </button>
+            <div class="slider-counter caption">
+              <span class="slider-counter--current">1</span>
+              <span aria-hidden="true"> / </span>
+              <span class="visually-hidden">{{ 'general.slider.of' | t }}</span>
+              <span class="slider-counter--total">{{ section.blocks.size }}</span>
+            </div>
+            <button type="button" class="slider-button slider-button--next" name="next" aria-label="{{ 'general.slider.next_slide' | t }}">
+              <span class="svg-wrapper">{{- 'icon-caret.svg' | inline_asset_content -}}</span>
+            </button>
+          </div>
+        {%- endif -%}
+      </slider-component>
+    {%- endif -%}
+
+    {%- if section.settings.show_view_all and section.blocks.size < collections.size -%}
+      <div
+        class="center collection-list-view-all{% if show_mobile_slider %} small-hide medium-hide{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+        {% if settings.animations_reveal_on_scroll %}data-cascade{% endif %}
+      >
+        <a
+          href="{{ routes.collections_url }}"
+          class="button"
+          id="ViewAllButton-{{ section.id }}"
+          aria-labelledby="ViewAllButton-{{ section.id }} SectionHeading-{{ section.id }}"
+        >
+          {{- 'sections.collection_list.view_all' | t -}}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
+<style>
+  /* Swiper grid fallback when slider is disabled for current breakpoint */
+  .cl-swiper--grid .swiper-wrapper {
+    display: grid;
+    grid-template-columns: repeat(var(--cl-cols-mobile, 1), 1fr);
+    gap: 16px;
+    flex-wrap: unset;
+    transform: none !important;
+  }
+  @media screen and (min-width: 750px) {
+    .cl-swiper--grid .swiper-wrapper {
+      grid-template-columns: repeat(var(--cl-cols-desktop, 3), 1fr);
+      gap: 20px;
+    }
+  }
+  .cl-swiper--grid .swiper-slide {
+    width: auto !important;
+    margin: 0 !important;
+  }
+  .cl-swiper--grid .cl-swiper-btn,
+  .cl-swiper--grid .cl-swiper-pagination {
+    display: none !important;
+  }
+
+  /* Slider layout */
+  .cl-swiper-section {
+    position: relative;
+  }
+  .cl-swiper-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cl-swiper-inner .swiper {
+    flex: 1;
+    min-width: 0;
+  }
+  .cl-swiper-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    background: transparent;
+    cursor: pointer;
+    color: inherit;
+    transition: background 0.2s, color 0.2s;
+  }
+  .cl-swiper-btn:hover {
+    background: rgba(0,0,0,0.08);
+  }
+  .cl-swiper-btn.swiper-button-disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .cl-swiper-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .cl-swiper-pagination .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.3;
+    cursor: pointer;
+  }
+  .cl-swiper-pagination .swiper-pagination-bullet-active {
+    opacity: 1;
+  }
+
+  /* Bottom-center arrow position */
+  .cl-swiper-arrows--bottom-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    margin-top: 16px;
+  }
+  .cl-swiper-arrows--bottom-center .cl-swiper-btn {
+    flex-shrink: 0;
+  }
+  .cl-swiper--grid .cl-swiper-arrows--bottom-center {
+    display: none !important;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "t:sections.collection-list.name",
+  "tag": "section",
+  "class": "section section-collection-list",
+  "max_blocks": 15,
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "default": "t:sections.collection-list.settings.title.default",
+      "label": "t:sections.collection-list.settings.title.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        { "value": "h2", "label": "t:sections.all.heading_size.options__1.label" },
+        { "value": "h1", "label": "t:sections.all.heading_size.options__2.label" },
+        { "value": "h0", "label": "t:sections.all.heading_size.options__3.label" },
+        { "value": "hxl", "label": "t:sections.all.heading_size.options__4.label" },
+        { "value": "hxxl", "label": "t:sections.all.heading_size.options__5.label" }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_mode",
+      "label": "Layout mode",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "slider", "label": "Slider (Swiper)" }
+      ],
+      "default": "grid",
+      "info": "Choose between a static grid or a Swiper carousel."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_swiper_desktop",
+      "label": "Enable slider on desktop",
+      "default": true,
+      "info": "Only applies when Layout mode is Slider."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_swiper_mobile",
+      "label": "Enable slider on mobile",
+      "default": true,
+      "info": "Only applies when Layout mode is Slider."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows_desktop",
+      "label": "Show arrows on desktop",
+      "default": true,
+      "info": "Only applies when Layout mode is Slider."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows_mobile",
+      "label": "Show arrows on mobile",
+      "default": false,
+      "info": "Only applies when Layout mode is Slider."
+    },
+    {
+      "type": "select",
+      "id": "arrow_position",
+      "label": "Arrow position",
+      "options": [
+        { "value": "left_right", "label": "Left & Right" },
+        { "value": "bottom_center", "label": "Bottom center" }
+      ],
+      "default": "left_right",
+      "info": "Only applies when Layout mode is Slider."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination_desktop",
+      "label": "Show pagination dots on desktop",
+      "default": false,
+      "info": "Only applies when Layout mode is Slider."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination_mobile",
+      "label": "Show pagination dots on mobile",
+      "default": true,
+      "info": "Only applies when Layout mode is Slider."
+    },
+    {
+      "type": "header",
+      "content": "t:sections.collection-list.settings.header_layout.content"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        { "value": "adapt", "label": "t:sections.collection-list.settings.image_ratio.options__1.label" },
+        { "value": "portrait", "label": "t:sections.collection-list.settings.image_ratio.options__2.label" },
+        { "value": "square", "label": "t:sections.collection-list.settings.image_ratio.options__3.label" }
+      ],
+      "default": "square",
+      "label": "t:sections.collection-list.settings.image_ratio.label"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3,
+      "label": "t:sections.collection-list.settings.columns_desktop.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "info": "t:sections.all.colors.has_cards_info",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "default": false,
+      "label": "t:sections.collection-list.settings.show_view_all.label",
+      "info": "t:sections.collection-list.settings.show_view_all.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.collection-list.settings.header_mobile.content"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "options": [
+        { "value": "1", "label": "t:sections.collection-list.settings.columns_mobile.options__1.label" },
+        { "value": "2", "label": "t:sections.collection-list.settings.columns_mobile.options__2.label" }
+      ],
+      "default": "1",
+      "label": "t:sections.collection-list.settings.columns_mobile.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "swipe_on_mobile",
+      "default": false,
+      "label": "t:sections.collection-list.settings.swipe_on_mobile.label",
+      "info": "Only applies when Layout mode is Grid."
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Custom CSS"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS class(es)",
+      "info": "Add one or more space-separated CSS classes to the section wrapper."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "featured_collection",
+      "name": "t:sections.collection-list.blocks.featured_collection.name",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "t:sections.collection-list.blocks.featured_collection.settings.collection.label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.collection-list.presets.name",
+      "blocks": [
+        { "type": "featured_collection" },
+        { "type": "featured_collection" },
+        { "type": "featured_collection" }
+      ]
+    }
+  ]
+}
+{% endschema %}

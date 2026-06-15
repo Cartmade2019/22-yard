@@ -1,0 +1,224 @@
+/* ============================================================
+   Mega menu base
+   ============================================================ */
+.mega-menu {
+  position: static;
+}
+
+.mega-menu__content {
+  background-color: rgb(var(--color-background));
+  border-left: 0;
+  border-radius: 0;
+  border-right: 0;
+  left: 0;
+  overflow-y: auto;
+  padding-bottom: 3rem;
+  padding-top: 3rem;
+  position: absolute;
+  right: 0;
+  top: 100%;
+}
+
+.shopify-section-header-sticky .mega-menu__content {
+  max-height: calc(100vh - var(--header-bottom-position-desktop, 20rem) - 4rem);
+}
+
+.header-wrapper--border-bottom .mega-menu__content {
+  border-top: 0;
+}
+
+.js .mega-menu__content {
+  opacity: 0;
+  transform: translateY(-1.5rem);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mega-menu[open] .mega-menu__content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   Menu nav position — handled by header-layout.css flex order
+   Menu items alignment within the nav
+   ============================================================ */
+@media screen and (min-width: 990px) {
+  .header__inline-menu {
+    align-items: center;
+  }
+
+  .header--menu-center .header__inline-menu .list-menu--inline {
+    justify-content: center;
+  }
+
+  .header--menu-right .header__inline-menu .list-menu--inline {
+    justify-content: flex-end;
+  }
+}
+
+/* ============================================================
+   Mega list — columns (default)
+   ============================================================ */
+.mega-menu__list {
+  display: grid;
+  gap: 1.8rem 4rem;
+  grid-template-columns: repeat(var(--mega-columns, 6), minmax(0, 1fr));
+  list-style: none;
+}
+
+/* condensed (single-level) */
+.mega-menu__list--condensed {
+  display: block;
+}
+
+.mega-menu__list--condensed .mega-menu__link {
+  font-weight: normal;
+}
+
+/* ============================================================
+   Mega list — grid with images
+   ============================================================ */
+.mega-menu__list--grid {
+  gap: 2rem;
+}
+
+.mega-menu__grid-item {
+  display: block;
+  margin-bottom: 0.8rem;
+  overflow: hidden;
+  border-radius: var(--media-border-radius, 0);
+}
+
+.mega-menu__grid-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.mega-menu__grid-item:hover .mega-menu__grid-img {
+  transform: scale(1.04);
+}
+
+/* ============================================================
+   Mega — featured layout (image left + links right)
+   ============================================================ */
+.mega-menu__featured {
+  display: flex;
+  gap: 4rem;
+  align-items: flex-start;
+}
+
+.mega-menu__featured-image {
+  flex: 0 0 26rem;
+  max-width: 26rem;
+}
+
+.mega-menu__featured-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--media-border-radius, 0);
+}
+
+.mega-menu__featured-heading {
+  margin-top: 0.8rem;
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.mega-menu__list--featured {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(var(--mega-columns, 3), minmax(0, 1fr));
+  gap: 1.8rem 3rem;
+  list-style: none;
+}
+
+/* ============================================================
+   Mega — full-width banner layout
+   ============================================================ */
+.mega-menu__content--fullwidth {
+  padding: 0;
+}
+
+.mega-menu__fullwidth-banner {
+  position: relative;
+  overflow: hidden;
+}
+
+.mega-menu__fullwidth-img {
+  display: block;
+  width: 100%;
+  height: 22rem;
+  object-fit: cover;
+}
+
+.mega-menu__fullwidth-heading {
+  position: absolute;
+  bottom: 2rem;
+  left: 3rem;
+  font-size: 2.4rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.mega-menu__list--fullwidth {
+  display: grid;
+  grid-template-columns: repeat(var(--mega-columns, 6), minmax(0, 1fr));
+  gap: 1.2rem 3rem;
+  list-style: none;
+  padding: 2rem 3rem;
+}
+
+/* ============================================================
+   Mega link styles
+   ============================================================ */
+.mega-menu__link {
+  color: rgba(var(--color-foreground), 0.75);
+  display: block;
+  line-height: calc(1 + 0.3 / var(--font-body-scale));
+  padding-bottom: 0.6rem;
+  padding-top: 0.6rem;
+  text-decoration: none;
+  transition: text-decoration var(--duration-short) ease;
+  word-wrap: break-word;
+}
+
+.mega-menu__link--level-2 {
+  font-weight: bold;
+}
+
+.mega-menu__link:hover,
+.mega-menu__link--active {
+  color: rgb(var(--color-foreground));
+  text-decoration: underline;
+}
+
+.mega-menu__link--active:hover {
+  text-decoration-thickness: 0.2rem;
+}
+
+/* top-center logo alignment adjustment */
+.header--top-center .mega-menu__list {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: 0;
+}
+
+.header--top-center .mega-menu__list > li {
+  width: 16%;
+  padding-right: 2.4rem;
+}
+
+/* ============================================================
+   Search max-width
+   ============================================================ */
+.search-modal__content {
+  max-width: var(--search-max-width, 72rem);
+  margin-left: auto;
+  margin-right: auto;
+}

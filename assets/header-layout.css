@@ -1,0 +1,249 @@
+/*
+  Header Layout
+  Supports logo position: left / center / right
+           menu position: left / center / right
+           search style:  icon_popup / inline
+
+  Uses flexbox with order + absolute centering tricks for center cases.
+  Mobile always: hamburger | logo(centred or left) | icons
+*/
+
+/* ============================================================
+   MOBILE (< 990px)
+   ============================================================ */
+.header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'drawer heading icons';
+  align-items: center;
+  position: relative;
+}
+
+header-drawer          { grid-area: drawer; }
+.header__heading,
+.header__heading-link  { grid-area: heading; text-align: center; justify-self: center; }
+.header__icons         { grid-area: icons;   justify-self: end; }
+
+.header--mobile-left .header__heading,
+.header--mobile-left .header__heading-link {
+  text-align: left;
+  justify-self: start;
+}
+
+/* hide desktop-only elements on mobile */
+.header__inline-menu,
+.header__search-inline {
+  display: none !important;
+}
+
+/* ============================================================
+   DESKTOP (≥ 990px)
+   ============================================================ */
+@media screen and (min-width: 990px) {
+
+  .header {
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+    position: relative; /* needed for absolute-centred children */
+  }
+
+  /* hide mobile drawer unless drawer-menu mode */
+  header-drawer { display: none; }
+  .drawer-menu header-drawer { display: flex; }
+
+  /* logo */
+  .header__heading,
+  .header__heading-link {
+    flex: 0 0 auto;
+    text-align: left;
+    justify-self: unset;
+  }
+
+  /* nav */
+  .header__inline-menu {
+    display: flex !important;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+
+  /* inline search bar */
+  .header__search-inline {
+    display: flex !important;
+    flex: 1 1 auto;
+    align-items: center;
+    min-width: 0;
+    padding: 0 1.5rem;
+  }
+
+  /* icons — always last, pushed right */
+  .header__icons {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  /* sticky reduce-logo handled by section inline style */
+
+  /* ===========================================================
+     LOGO LEFT
+     =========================================================== */
+
+  /* logo-left + menu-left:  [Logo][Nav]......[Search?][Icons] */
+  .header--logo-left.header--menu-left .header__heading,
+  .header--logo-left.header--menu-left .header__heading-link {
+    order: 1; margin-right: 2rem;
+  }
+  .header--logo-left.header--menu-left .header__inline-menu { order: 2; }
+  .header--logo-left.header--menu-left .header__search-inline { order: 3; }
+  .header--logo-left.header--menu-left .header__icons { order: 4; }
+
+  /* logo-left + menu-center: [Logo]....[Nav centred]....[Icons] */
+  .header--logo-left.header--menu-center .header__heading,
+  .header--logo-left.header--menu-center .header__heading-link {
+    order: 1; margin-right: 0;
+  }
+  .header--logo-left.header--menu-center .header__inline-menu {
+    order: 3;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: auto;
+  }
+  .header--logo-left.header--menu-center .header__search-inline { order: 3; flex: 1 1 auto; }
+  .header--logo-left.header--menu-center .header__icons { order: 4; }
+
+  /* logo-left + menu-right: [Logo]......[Search?][Nav][Icons] */
+  .header--logo-left.header--menu-right .header__heading,
+  .header--logo-left.header--menu-right .header__heading-link {
+    order: 1;
+  }
+  .header--logo-left.header--menu-right .header__search-inline { order: 2; }
+  .header--logo-left.header--menu-right .header__inline-menu   { order: 3; margin-left: auto; }
+  .header--logo-left.header--menu-right .header__icons         { order: 4; margin-left: 2rem; }
+
+  /* When menu-right and no inline search, still push nav right */
+  .header--logo-left.header--menu-right:not(.header--search-inline) .header__inline-menu {
+    margin-left: auto;
+  }
+
+  /* ===========================================================
+     LOGO CENTER
+     =========================================================== */
+
+  /* logo-center + menu-left: [Nav]....[Logo centred]....[Icons] */
+  .header--logo-center.header--menu-left .header__inline-menu {
+    order: 1; flex: 0 0 auto;
+  }
+  .header--logo-center.header--menu-left .header__heading,
+  .header--logo-center.header--menu-left .header__heading-link {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    order: 2;
+    text-align: center;
+  }
+  .header--logo-center.header--menu-left .header__search-inline { order: 3; flex: 1 1 auto; }
+  .header--logo-center.header--menu-left .header__icons         { order: 4; }
+
+  /* logo-center + menu-center: use a centred wrapper via justify-content */
+  .header--logo-center.header--menu-center {
+    justify-content: center;
+  }
+  .header--logo-center.header--menu-center .header__heading,
+  .header--logo-center.header--menu-center .header__heading-link {
+    order: 2; flex: 0 0 auto; text-align: center;
+  }
+  .header--logo-center.header--menu-center .header__inline-menu {
+    order: 1; flex: 0 0 auto;
+  }
+  .header--logo-center.header--menu-center .header__search-inline {
+    position: absolute;
+    right: 0;
+    width: auto;
+    max-width: 32rem;
+    flex: none;
+    order: 3;
+  }
+  .header--logo-center.header--menu-center .header__icons {
+    position: absolute;
+    right: 0;
+    order: 4;
+    margin-left: 0;
+  }
+
+  /* logo-center + menu-right: [spacer]....[Logo centred]....[Nav][Icons] */
+  .header--logo-center.header--menu-right .header__heading,
+  .header--logo-center.header--menu-right .header__heading-link {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    order: 2; text-align: center;
+  }
+  .header--logo-center.header--menu-right .header__search-inline { order: 2; flex: 1 1 auto; }
+  .header--logo-center.header--menu-right .header__inline-menu   { order: 3; margin-left: auto; flex: 0 0 auto; }
+  .header--logo-center.header--menu-right .header__icons         { order: 4; margin-left: 2rem; }
+  .header--logo-center.header--menu-right:not(.header--search-inline) .header__inline-menu {
+    margin-left: auto;
+  }
+
+  /* ===========================================================
+     LOGO RIGHT
+     =========================================================== */
+
+  /* logo-right + menu-left: [Nav]......[Search?][Logo][Icons] */
+  .header--logo-right.header--menu-left .header__inline-menu  { order: 1; }
+  .header--logo-right.header--menu-left .header__search-inline{ order: 2; flex: 1 1 auto; }
+  .header--logo-right.header--menu-left .header__heading,
+  .header--logo-right.header--menu-left .header__heading-link  { order: 3; margin-left: auto; text-align: right; }
+  .header--logo-right.header--menu-left .header__icons         { order: 4; margin-left: 0; }
+
+  /* logo-right + menu-center: [spacer]....[Nav centred]....[Logo][Icons] */
+  .header--logo-right.header--menu-center .header__inline-menu {
+    order: 2;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .header--logo-right.header--menu-center .header__search-inline{ order: 1; flex: 1 1 auto; }
+  .header--logo-right.header--menu-center .header__heading,
+  .header--logo-right.header--menu-center .header__heading-link  { order: 3; margin-left: auto; text-align: right; }
+  .header--logo-right.header--menu-center .header__icons         { order: 4; margin-left: 0; }
+
+  /* logo-right + menu-right: [spacer]......[Nav][Logo][Icons] */
+  .header--logo-right.header--menu-right .header__search-inline { order: 1; flex: 1 1 auto; }
+  .header--logo-right.header--menu-right .header__inline-menu   { order: 2; margin-left: auto; }
+  .header--logo-right.header--menu-right .header__heading,
+  .header--logo-right.header--menu-right .header__heading-link   { order: 3; margin-left: 2rem; text-align: right; }
+  .header--logo-right.header--menu-right .header__icons          { order: 4; margin-left: 2rem; }
+  .header--logo-right.header--menu-right:not(.header--search-inline) .header__inline-menu {
+    margin-left: auto;
+  }
+
+  /* ===========================================================
+     Inline search: hide the spacer flex when not search-inline
+     =========================================================== */
+  .header:not(.header--search-inline) .header__search-inline {
+    display: none !important;
+  }
+
+  /* ===========================================================
+     Popup search icon — hide in icons when inline on desktop
+     =========================================================== */
+  .header--search-inline .header__icons .header__search {
+    display: none;
+  }
+
+  /* mega-menu content z-index over absolute logo */
+  .mega-menu__content {
+    z-index: 50;
+  }
+}
+
+/* ============================================================
+   Sticky header - reduce logo size
+   ============================================================ */
+.scrolled-past-header .header__heading-logo-wrapper {
+  transition: width 0.3s ease;
+}
